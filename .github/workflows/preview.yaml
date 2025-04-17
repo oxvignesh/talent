@@ -1,0 +1,39 @@
+name: Talent Preview Deployment
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+  CONVEX_DEPLOYMENT: ${{ secrets.CONVEX_DEPLOYMENT }}
+  CONVEX_DEPLOY_KEY : ${{ secrets.CONVEX_DEPLOY_KEY }}
+  NEXT_PUBLIC_CONVEX_URL: ${{ secrets.NEXT_PUBLIC_CONVEX_URL }}
+  NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY }}
+  CLERK_SECRET_KEY: ${{ secrets.CLERK_SECRET_KEY }}
+  NEXT_PUBLIC_HOSTING_URL: ${{ secrets.NEXT_PUBLIC_HOSTING_URL }}
+  NEXT_STRIPE_PUBLIC_KEY: ${{ secrets.NEXT_STRIPE_PUBLIC_KEY }}
+  NEXT_STRIPE_SECRET_KEY: ${{ secrets.NEXT_STRIPE_SECRET_KEY }}
+
+on:
+  push:
+    branches:
+      - preview
+
+jobs:
+  Deploy-Preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel
+
+      - name: Pull Vercel Environment Information
+        run: vercel pull --yes --environment=preview --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build Project Artifacts
+        run: vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_FORCE_NO_BUILD_CACHE: 1
+          NPM_FLAGS: --legacy-peer-deps
+
+      - name: Deploy Project Artifacts
+        run: vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
